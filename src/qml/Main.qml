@@ -7,7 +7,7 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("RMM")
 
     SystemMonitor {
         id: monitor
@@ -33,19 +33,24 @@ ApplicationWindow {
                 height: parent.height
                 radius: 5
                 border.color: "black"
-                color: "#444444"
                 RowLayout {
                     width: parent.width - 20
                     anchors.centerIn: parent
                     Label {
+                        Layout.alignment: Qt.AlignLeft
                         text: modelData.processName
+                        font.pixelSize: 16
                         font.bold: true
                     }
                     Label {
+                        Layout.alignment: Qt.AlignRight
                         text: modelData.cpuUsage
+                        width: 50
                     }
                     Label {
+                        Layout.alignment: Qt.AlignRight
                         text: modelData.cpuPercentage
+                        width: 50
                     }
                 }
             }
