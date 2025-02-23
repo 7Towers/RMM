@@ -2,12 +2,11 @@
 #define SYSTEMMONITOR_H
 
 #include <QQuickItem>
-#include <libproc.h>
 #include <thread>
 #include <unistd.h>
 #include <QThread>
-
 #include "ProcessMetrics.h"
+#include "CrossProcess.h"
 
 class MetricsThread: public QThread
 {
@@ -41,9 +40,6 @@ public slots:
 private:
     void cleanupProcessRefs();
     QList<ProcessMetrics*> m_processes = QList<ProcessMetrics*>();
-    std::vector<std::pair<pid_t, std::string>> getProcessList();
-    static double getCPUUsage(pid_t pid);
-    static double getCPUPercentage(pid_t pid);
     QThread updateThread;
 
 signals:

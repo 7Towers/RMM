@@ -22,7 +22,7 @@ public:
     double cpuPercentage() const;
     double RAMUsage() const;
     double RAMPercentage() const;
-    void setPid(pid_t pid);
+    void setPid(QString pid);
     void setProcessName(QString processName);
     void setCPUUsage(double cpuUsage);
     void setCPUPercentage(double cpuPercentage);
@@ -34,7 +34,7 @@ private:
     double m_cpuPercentage = 0;
     double m_RAMUsage = 0;
     double m_RAMPercentage = 0;
-    pid_t m_pid = 0;
+    QString m_pid = 0;
 signals:
     void processNameChanged(QString processName);
     void cpuUsageChanged(double cpuUsage);

@@ -67,7 +67,7 @@ void ProcessMetrics::setRAMPercentage(double RAMPercentage) {
     emit RAMPercentageChanged(m_RAMPercentage);
 }
 
-void ProcessMetrics::setPid(pid_t pid) {
+void ProcessMetrics::setPid(QString pid) {
     m_pid = pid;
 }
 
