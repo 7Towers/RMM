@@ -20,7 +20,7 @@ public:
 protected:
         void run() override;
 private:
-    QList<QMap<QString, ProcessInfo>> processInfoList = QList<QMap<QString, ProcessInfo>>();
+    QMap<QString, ProcessInfo> m_processInfoList = QMap<QString, ProcessInfo>();
     void updateProcessList();
     void cleanupProcessRefs();
     void getInitialProcessList();

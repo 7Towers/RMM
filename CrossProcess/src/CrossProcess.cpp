@@ -15,7 +15,7 @@ QList<QString> CrossProcess::getProcessIDList() {
 #endif
 }
 
-QList<QMap<QString, ProcessInfo>> CrossProcess::getProcessInfoList() {
+QMap<QString, ProcessInfo> CrossProcess::getProcessInfoList() {
 #ifdef Q_OS_WIN
     return winGetProcessInfoList();
 #elif Q_OS_MACOS
@@ -47,8 +47,8 @@ QList<QString> CrossProcess::winGetProcessIDList() {
     return pList;
 }
 
-QList<QMap<QString, ProcessInfo>> CrossProcess::winGetProcessInfoList() {
-        auto pList = QList<QMap<QString, ProcessInfo>>();
+QMap<QString, ProcessInfo> CrossProcess::winGetProcessInfoList() {
+        auto pList = QMap<QString, ProcessInfo>();
 
         DWORD processIds[1024], bytesReturned;
         if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned)) {
@@ -68,13 +68,11 @@ QList<QMap<QString, ProcessInfo>> CrossProcess::winGetProcessInfoList() {
                         GetModuleBaseName(hProcess, hMod, processName, sizeof(processName) / sizeof(TCHAR));
                     }
 
-                    QMap<QString, ProcessInfo> processInfoMap;
 
                     ProcessInfo pInfo;
                     pInfo.pid = QString::number(processIds[i]);
                     pInfo.name = QString::fromWCharArray(processName);
-                    processInfoMap["PID"] = pInfo;
-                    pList.append(processInfoMap);
+                    pList[pInfo.pid] = pInfo;
 
                     CloseHandle(hProcess);
                 }
@@ -103,8 +101,8 @@ QList<QString> CrossProcess::macGetProcessIDList() {
     return pList;
 }
 
-st<QMap<QString, ProcessInfo> CrossProcess::winGetProcessInfoList() {
-    auto pList = QList<QMap<QString, ProcessInfo>();
+QMap<QString, ProcessInfo> CrossProcess::winGetProcessInfoList() {
+    auto pList = QMap<QString, ProcessInfo>();
 
     DWORD processIds[1024], bytesReturned;
     if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned)) {
@@ -129,7 +127,7 @@ st<QMap<QString, ProcessInfo> CrossProcess::winGetProcessInfoList() {
                 processInfoMap["PID"] = QString::number(processIds[i]);
                 pInfo.pid = QString::number(processIds[i]);
                 pInfo.name = QString::fromWCharArray(processName);
-                pList.append(processInfoMap);
+                pList[pInfo.pid] = pInfo;
 
                 CloseHandle(hProcess);
             }

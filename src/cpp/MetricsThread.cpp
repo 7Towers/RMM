@@ -25,20 +25,23 @@ void MetricsThread::run() {
 
 void MetricsThread::updateProcessList()
 {
-    this->processInfoList.clear();
+    // get a list of current processes
+    auto processInfoList = CrossProcess::getProcessInfoList();
+    // when you loop through, see if process info has changed compared to this->m_proce
 }
 
 void MetricsThread::cleanupProcessRefs() {
-    this->processInfoList.clear();
+    this->m_processInfoList.clear();
 }
 
 void MetricsThread::getInitialProcessList() {
     auto processInfoList = CrossProcess::getProcessInfoList();
-    for (auto& processInfo : processInfoList) {
+    this->m_processInfoList = processInfoList;
+    for (auto& processInfo : this->m_processInfoList) {
         auto process = new ProcessMetrics();
-        process->setPid(processInfo["PID"].pid);
-        process->setProcessName(processInfo["PID"].name);
-        process->setCPUPercentage(processInfo["PID"].cpu_percentage);
-        emit addProcessInfo(processInfo["PID"]);
+        process->setPid(processInfo.pid);
+        process->setProcessName(processInfo.name);
+        process->setCPUPercentage(processInfo.cpu_percentage);
+        emit addProcessInfo(processInfo);
     }
 }

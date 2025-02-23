@@ -15,14 +15,14 @@
 class CrossProcess {
 public:
     static QList<QString> getProcessIDList();
-    static QList<QMap<QString, ProcessInfo>> getProcessInfoList();
+    static QMap<QString, ProcessInfo> getProcessInfoList();
 private:
 #ifdef Q_OS_WIN
     static QList<QString> winGetProcessIDList();
-    static QList<QMap<QString, ProcessInfo>> winGetProcessInfoList();
+    static QMap<QString, ProcessInfo> winGetProcessInfoList();
 #elif Q_OS_MACOS
     static QList<QString> macGetProcessIDList();
-    static QList<QMap<QString, ProcessInfo> macGetProcessInfoList();
+    static QMap<QString, ProcessInfo> macGetProcessInfoList();
 #endif
 };
 
