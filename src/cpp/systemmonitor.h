@@ -32,7 +32,9 @@ private:
     MetricsThread metricsThread = MetricsThread(this);
 
 signals:
+    void beforeProcessesChanged();
     void processesChanged();
+    void afterProcessesChanged();
 };
 
 #endif // SYSTEMMONITOR_H

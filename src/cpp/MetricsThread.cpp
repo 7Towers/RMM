@@ -19,6 +19,7 @@ void MetricsThread::run() {
     this->getInitialProcessList();
     while (m_running) {
         qDebug() << "Doing work";
+        this->updateProcessList();
         sleep(1);
     }
 }
@@ -26,8 +27,30 @@ void MetricsThread::run() {
 void MetricsThread::updateProcessList()
 {
     // get a list of current processes
-    auto processInfoList = CrossProcess::getProcessInfoList();
-    // when you loop through, see if process info has changed compared to this->m_proce
+    auto newProcessInfoList = CrossProcess::getProcessInfoList();
+    // when you loop through, see if process info has changed compared to this->m_processInfoList
+    for (auto& processInfo : newProcessInfoList) {
+        if (this->m_processInfoList.contains(processInfo.pid)) {
+            auto oldProcessInfo = this->m_processInfoList[processInfo.pid];
+            if (oldProcessInfo.cpu_percentage != processInfo.cpu_percentage) {
+                emit updateProcessInfo(processInfo);
+            }
+            if (oldProcessInfo.memory_percentage != processInfo.memory_percentage) {
+                emit updateProcessInfo(processInfo);
+            }
+            if (oldProcessInfo.name != processInfo.name) {
+                emit updateProcessInfo(processInfo);
+            }
+        } else {
+            emit addProcessInfo(processInfo);
+        }
+    }
+    // if a process is no longer in the list, emit removeProcessInfo
+    for (auto& processInfo : this->m_processInfoList) {
+        if (!newProcessInfoList.contains(processInfo.pid)) {
+            emit removeProcessInfo(processInfo);
+        }
+    }
 }
 
 void MetricsThread::cleanupProcessRefs() {

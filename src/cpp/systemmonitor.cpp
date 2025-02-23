@@ -34,42 +34,47 @@ void SystemMonitor::start() {
 }
 
 void SystemMonitor::onRemoveProcessInfo(ProcessInfo pi) {
-    for (auto& process : m_processes) {
-        if (process->pid() == pi.pid) {
-            m_processes.removeOne(process);
-            delete process;
-            break;
+    emit beforeProcessesChanged();
+    qDebug() << "Removing process info";
+    for (const auto& process : m_processes) {
+        try {
+            if (process->pid() == pi.pid) {
+                m_processes.removeOne(process);
+                delete process;
+                emit processesChanged();
+                emit afterProcessesChanged();
+                break;
+            }
+        } catch (std::exception& e) {
+            qWarning() << e.what();
         }
     }
 }
 
 void SystemMonitor::onUpdateProcessInfo(ProcessInfo pi) {
     // find the process in processList by pid, then update it
-    bool processFound = false;
+    emit beforeProcessesChanged();
+    qDebug() << "Updating process info";
     for (auto& process : m_processes) {
         if (process->pid() == pi.pid) {
             process->setCPUPercentage(pi.cpu_percentage);
             process->setRAMPercentage(pi.memory_percentage);
             process->setProcessName(pi.name);
-            processFound = true;
+            emit processesChanged();
+            emit afterProcessesChanged();
             break;
         }
-    }
-    if (!processFound) {
-        auto process = new ProcessMetrics();
-        process->setPid(pi.pid);
-        process->setCPUPercentage(pi.cpu_percentage);
-        process->setRAMPercentage(pi.memory_percentage);
-        process->setProcessName(pi.name);
-        m_processes.append(process);
     }
 }
 
 void SystemMonitor::onAddProcessInfo(ProcessInfo pi) {
+    emit beforeProcessesChanged();
+    qDebug() << "Adding process info";
     auto pm = new ProcessMetrics();
     pm->setPid(pi.pid);
     pm->setProcessName(pi.name);
     pm->setCPUPercentage(pi.cpu_percentage);
     m_processes.append(pm);
     emit processesChanged();
+    emit afterProcessesChanged();
 }

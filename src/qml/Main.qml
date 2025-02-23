@@ -16,11 +16,19 @@ ApplicationWindow {
     Component.onCompleted: {
         monitor.start()
     }
+
     Column {
         anchors.fill: parent
         width: parent.width
         height: parent.height
         spacing: 10
+
+        RowLayout {
+            Label {
+                Layout.alignment: Qt.AlignLeft
+                text: "Total processes: " + monitor.processes.length
+            }
+        }
 
         RowLayout {
             width: parent.width - 20
@@ -45,6 +53,23 @@ ApplicationWindow {
         }
         ListView {
             id: listView
+            property real scrollPosition: 0
+            function savePosition(){
+                scrollPosition = contentY;
+            }
+
+            Connections {
+                target: monitor
+                function onBeforeProcessesChanged() {
+                    console.log("QML Saving scroll position");
+                    listView.savePosition()
+                }
+                function onAfterProcessesChanged() {
+                    console.log("QML resetting scroll position");
+                   listView.contentY = listView.scrollPosition
+                }
+            }
+
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 20
             height: parent.height - 50
