@@ -23,9 +23,9 @@ public:
     Q_INVOKABLE void start();
 
 public slots:
-    void onUpdateProcessInfo(ProcessInfo pi);
-    void onRemoveProcessInfo(ProcessInfo pi);
-    void onAddProcessInfo(ProcessInfo pi);
+    void onUpdateProcessInfo(const ProcessInfo& pi);
+    void onRemoveProcessInfo(const ProcessInfo& pi);
+    void onAddProcessInfo(const ProcessInfo& pi);
 private:
     void cleanupProcessRefs();
     QList<ProcessMetrics*> m_processes = QList<ProcessMetrics*>();

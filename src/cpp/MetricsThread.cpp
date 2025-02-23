@@ -42,13 +42,17 @@ void MetricsThread::updateProcessList()
                 emit updateProcessInfo(processInfo);
             }
         } else {
+            this->m_processInfoList[processInfo.pid] = processInfo;
             emit addProcessInfo(processInfo);
         }
     }
     // if a process is no longer in the list, emit removeProcessInfo
-    for (auto& processInfo : this->m_processInfoList) {
+    for (auto it = this->m_processInfoList.begin(); it != this->m_processInfoList.end(); it++) {
+        auto processInfo = it.value();
         if (!newProcessInfoList.contains(processInfo.pid)) {
             emit removeProcessInfo(processInfo);
+            it = this->m_processInfoList.erase(it);
+            qDebug() << "Removed process info with pid: " << processInfo.pid;
         }
     }
 }

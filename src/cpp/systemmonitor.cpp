@@ -33,25 +33,26 @@ void SystemMonitor::start() {
     metricsThread.start();
 }
 
-void SystemMonitor::onRemoveProcessInfo(ProcessInfo pi) {
+void SystemMonitor::onRemoveProcessInfo(const ProcessInfo& pi) {
     emit beforeProcessesChanged();
     qDebug() << "Removing process info";
-    for (const auto& process : m_processes) {
-        try {
-            if (process->pid() == pi.pid) {
-                m_processes.removeOne(process);
-                delete process;
-                emit processesChanged();
-                emit afterProcessesChanged();
-                break;
-            }
-        } catch (std::exception& e) {
-            qWarning() << e.what();
+    int indexToRemove = -1;
+    for (int i = 0; i < m_processes.size(); i++) {
+        if (const auto process = this->m_processes[i]; process->pid() == pi.pid) {
+            indexToRemove = i;
+            break;
         }
     }
+    if (indexToRemove == -1) {
+        return;
+    }
+    const auto processToRemove = m_processes.takeAt(indexToRemove);
+    delete processToRemove;
+    emit processesChanged();
+    emit afterProcessesChanged();
 }
 
-void SystemMonitor::onUpdateProcessInfo(ProcessInfo pi) {
+void SystemMonitor::onUpdateProcessInfo(const ProcessInfo& pi) {
     // find the process in processList by pid, then update it
     emit beforeProcessesChanged();
     qDebug() << "Updating process info";
@@ -67,7 +68,7 @@ void SystemMonitor::onUpdateProcessInfo(ProcessInfo pi) {
     }
 }
 
-void SystemMonitor::onAddProcessInfo(ProcessInfo pi) {
+void SystemMonitor::onAddProcessInfo(const ProcessInfo& pi) {
     emit beforeProcessesChanged();
     qDebug() << "Adding process info";
     auto pm = new ProcessMetrics();
