@@ -14,7 +14,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        monitor.updateProcessList()
+        monitor.start()
     }
     Column {
         anchors.fill: parent
@@ -24,6 +24,7 @@ ApplicationWindow {
 
         RowLayout {
             width: parent.width - 20
+            anchors.horizontalCenter: parent.horizontalCenter
             Label {
                 text: "Process Name"
                 font.pixelSize: 16

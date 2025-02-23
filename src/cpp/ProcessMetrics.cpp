@@ -11,6 +11,10 @@ QString ProcessMetrics::processName() const {
     return m_processName;
 }
 
+QString ProcessMetrics::pid() const {
+    return this->m_pid;
+}
+
 void ProcessMetrics::setProcessName(QString processName) {
     if (m_processName == processName)
         return;
@@ -41,18 +45,6 @@ void ProcessMetrics::setCPUPercentage(double cpuPercentage) {
 
     m_cpuPercentage = cpuPercentage;
     emit cpuPercentageChanged(m_cpuPercentage);
-}
-
-double ProcessMetrics::RAMUsage() const {
-    return m_RAMUsage;
-}
-
-void ProcessMetrics::setRAMUsage(double RAMUsage) {
-    if (m_RAMUsage == RAMUsage)
-        return;
-
-    m_RAMUsage = RAMUsage;
-    emit RAMUsageChanged(m_RAMUsage);
 }
 
 double ProcessMetrics::RAMPercentage() const {

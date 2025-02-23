@@ -2,17 +2,14 @@
 #include <QProcess>
 #include <QDir>
 
-SystemMonitor::SystemMonitor()
-{
-    qDebug() << "SystemMonitor::SystemMonitor()";
-}
+
+SystemMonitor::SystemMonitor()= default;
 
 SystemMonitor::~SystemMonitor()
 {
     cleanupProcessRefs();
-    metricsThread.running = false;
+    metricsThread.stop();
     metricsThread.wait();
-
 }
 
 QQmlListProperty<ProcessMetrics> SystemMonitor::processes()
@@ -28,16 +25,51 @@ void SystemMonitor::cleanupProcessRefs()
     m_processes.clear();
 }
 
-void SystemMonitor::updateProcessList()
-{
-    cleanupProcessRefs();
-    auto processInfoList = CrossProcess::getProcessInfoList();
-    for (auto& processInfo : processInfoList) {
-        auto process = new ProcessMetrics();
-        process->setPid(processInfo["PID"].pid);
-        process->setProcessName(processInfo["PID"].name);
-        m_processes.append(process);
-    }
-    emit processesChanged();
+
+void SystemMonitor::start() {
+    connect(&metricsThread, &MetricsThread::updateProcessInfo, this, &SystemMonitor::onUpdateProcessInfo);
+    connect(&metricsThread, &MetricsThread::removeProcessInfo, this, &SystemMonitor::onRemoveProcessInfo);
+    connect(&metricsThread, &MetricsThread::addProcessInfo, this, &SystemMonitor::onAddProcessInfo);
+    metricsThread.start();
 }
 
+void SystemMonitor::onRemoveProcessInfo(ProcessInfo pi) {
+    for (auto& process : m_processes) {
+        if (process->pid() == pi.pid) {
+            m_processes.removeOne(process);
+            delete process;
+            break;
+        }
+    }
+}
+
+void SystemMonitor::onUpdateProcessInfo(ProcessInfo pi) {
+    // find the process in processList by pid, then update it
+    bool processFound = false;
+    for (auto& process : m_processes) {
+        if (process->pid() == pi.pid) {
+            process->setCPUPercentage(pi.cpu_percentage);
+            process->setRAMPercentage(pi.memory_percentage);
+            process->setProcessName(pi.name);
+            processFound = true;
+            break;
+        }
+    }
+    if (!processFound) {
+        auto process = new ProcessMetrics();
+        process->setPid(pi.pid);
+        process->setCPUPercentage(pi.cpu_percentage);
+        process->setRAMPercentage(pi.memory_percentage);
+        process->setProcessName(pi.name);
+        m_processes.append(process);
+    }
+}
+
+void SystemMonitor::onAddProcessInfo(ProcessInfo pi) {
+    auto pm = new ProcessMetrics();
+    pm->setPid(pi.pid);
+    pm->setProcessName(pi.name);
+    pm->setCPUPercentage(pi.cpu_percentage);
+    m_processes.append(pm);
+    emit processesChanged();
+}
