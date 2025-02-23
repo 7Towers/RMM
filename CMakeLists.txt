@@ -9,20 +9,22 @@ find_package(Qt6 6.8 REQUIRED COMPONENTS Quick)
 qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appRMM
-    main.cpp
-        CrossProcess/src/CrossProcess.cpp
-        CrossProcess/src/CrossProcess.h
+        src/cpp/main.cpp
 )
 
 qt_add_qml_module(appRMM
     URI RMM
     VERSION 1.0
     QML_FILES
-        Main.qml
-        SOURCES systemmonitor.h systemmonitor.cpp
-        SOURCES ProcessMetrics.cpp ProcessMetrics.h
+        src/qml/Main.qml
+        SOURCES src/cpp/systemmonitor.h src/cpp/systemmonitor.cpp
+        SOURCES src/cpp/ProcessMetrics.cpp src/cpp/ProcessMetrics.h
 )
 
+target_include_directories(appRMM
+    PRIVATE
+        src/cpp
+)
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
