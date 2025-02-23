@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 import RMM
 
@@ -16,26 +16,46 @@ ApplicationWindow {
     Component.onCompleted: {
         monitor.updateProcessList()
     }
-
-    ListView {
-        id: listView
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - 20
+    Column {
+        anchors.fill: parent
+        width: parent.width
         height: parent.height
-        model: monitor.processes
-        spacing: 5
-        delegate: Item {
-            width: listView.width
-            height: 50
-            Rectangle {
-                width: parent.width - 20
-                anchors.centerIn: parent
-                height: parent.height
-                radius: 5
-                border.color: "black"
+        spacing: 10
+
+        RowLayout {
+            width: parent.width - 20
+            Label {
+                text: "Process Name"
+                font.pixelSize: 16
+                font.bold: true
+            }
+            Label {
+                text: "CPU Usage"
+                font.pixelSize: 16
+                font.bold: true
+                Layout.alignment: Qt.AlignRight
+            }
+            Label {
+                text: "CPU %"
+                font.pixelSize: 16
+                font.bold: true
+                Layout.alignment: Qt.AlignRight
+            }
+        }
+        ListView {
+            id: listView
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 20
+            height: parent.height - 50
+            model: monitor.processes
+            spacing: 5
+            clip: true
+            delegate: ItemDelegate {
+                width: listView.width - 20
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 50
                 RowLayout {
-                    width: parent.width - 20
-                    anchors.centerIn: parent
+                    anchors.fill: parent
                     Label {
                         Layout.alignment: Qt.AlignLeft
                         text: modelData.processName

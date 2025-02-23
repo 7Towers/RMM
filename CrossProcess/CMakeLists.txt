@@ -12,6 +12,8 @@ add_library(${PROJECT_NAME}
         STATIC
         src/CrossProcess.cpp
         src/CrossProcess.h
+        src/ProcessInfo.cpp
+        src/ProcessInfo.h
 )
 
 target_include_directories(${PROJECT_NAME}

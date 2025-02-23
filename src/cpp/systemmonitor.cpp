@@ -10,6 +10,9 @@ SystemMonitor::SystemMonitor()
 SystemMonitor::~SystemMonitor()
 {
     cleanupProcessRefs();
+    metricsThread.running = false;
+    metricsThread.wait();
+
 }
 
 QQmlListProperty<ProcessMetrics> SystemMonitor::processes()
@@ -31,8 +34,8 @@ void SystemMonitor::updateProcessList()
     auto processInfoList = CrossProcess::getProcessInfoList();
     for (auto& processInfo : processInfoList) {
         auto process = new ProcessMetrics();
-        process->setProcessName(processInfo["Name"]);
-        process->setPid(processInfo["PID"]);
+        process->setPid(processInfo["PID"].pid);
+        process->setProcessName(processInfo["PID"].name);
         m_processes.append(process);
     }
     emit processesChanged();

@@ -7,6 +7,7 @@
 #include <QThread>
 #include "ProcessMetrics.h"
 #include "CrossProcess.h"
+#include "ProcessInfo.h"
 
 class MetricsThread: public QThread
 {
@@ -40,7 +41,7 @@ public slots:
 private:
     void cleanupProcessRefs();
     QList<ProcessMetrics*> m_processes = QList<ProcessMetrics*>();
-    QThread updateThread;
+    MetricsThread metricsThread = MetricsThread();
 
 signals:
     void processesChanged();
