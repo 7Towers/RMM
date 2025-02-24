@@ -59,7 +59,7 @@ void SystemMonitor::onUpdateProcessInfo(const ProcessInfo& pi) {
     for (auto& process : m_processes) {
         if (process->pid() == pi.pid()) {
             process->setCPUPercentage(pi.cpu_percentage);
-            process->setRAMPercentage(pi.memory_percentage);
+            process->setRAMUsage(pi.memory_percentage);
             process->setProcessName(pi.name);
             emit processesChanged();
             emit afterProcessesChanged();

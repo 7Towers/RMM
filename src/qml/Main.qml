@@ -118,7 +118,7 @@ ApplicationWindow {
                         width: 100
                         Label {
                             anchors.centerIn: parent
-                            text: Math.round(modelData.RAMPercentage) + " MB";
+                            text: Math.round(modelData.RAMUsage) + " MB";
                         }
                     }
                     Item {

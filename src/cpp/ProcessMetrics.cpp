@@ -35,16 +35,16 @@ void ProcessMetrics::setCPUPercentage(double cpuPercentage) {
     emit cpuPercentageChanged(m_cpuPercentage);
 }
 
-double ProcessMetrics::RAMPercentage() const {
-    return m_RAMPercentage;
+double ProcessMetrics::RAMUsage() const {
+    return m_RAMUsage;
 }
 
-void ProcessMetrics::setRAMPercentage(double RAMPercentage) {
-    if (m_RAMPercentage == RAMPercentage)
+void ProcessMetrics::setRAMUsage(double RAMUsage) {
+    if (m_RAMUsage == RAMUsage)
         return;
 
-    m_RAMPercentage = RAMPercentage;
-    emit RAMPercentageChanged(m_RAMPercentage);
+    m_RAMUsage = RAMUsage;
+    emit RAMUsageChanged(m_RAMUsage);
 }
 
 void ProcessMetrics::setPid(QString pid) {
