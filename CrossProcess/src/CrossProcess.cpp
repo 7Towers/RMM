@@ -35,6 +35,15 @@ std::vector<double> CrossProcess::getProcessCPUUsage(const QList<QString> &pids)
 #endif
 }
 
+std::vector<double> CrossProcess::getProcessMemoryUsage(const QList<QString> &pids) {
+#ifdef Q_OS_WIN
+    return winGetProcessMemoryUsage(pids);
+#elif
+    qWarning() << "CrossProcess::getProcessMemoryUsage() not implemented for this platform";
+    return -1.0;
+#endif
+}
+
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <psapi.h>
@@ -144,6 +153,24 @@ std::vector<double> CrossProcess::winGetProcessCPUUsage(const QList<QString> &pi
     }
 
     return cpuUsages;
+}
+
+std::vector<double> CrossProcess::winGetProcessMemoryUsage(const QList<QString> &pids) {
+    std::vector<double> memoryUsages(pids.size(), -1.0);
+
+    for (int i = 0; i < pids.size(); ++i) {
+        DWORD processID = pids[i].toUInt();
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
+        if (hProcess != NULL) {
+            PROCESS_MEMORY_COUNTERS pmc;
+            if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
+                memoryUsages[i] = static_cast<double>(pmc.WorkingSetSize) / (1024 * 1024); // Convert to MB
+            }
+            CloseHandle(hProcess);
+        }
+    }
+
+    return memoryUsages;
 }
 
 #endif

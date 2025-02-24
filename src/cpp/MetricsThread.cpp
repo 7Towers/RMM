@@ -58,7 +58,7 @@ void MetricsThread::updateProcessList()
             qDebug() << "Removed process info with pid: " << processInfo.pid();
         }
     }
-    this->updateAllCPUUsage();
+    this->updateAllUsages();
 }
 
 void MetricsThread::cleanupProcessRefs() {
@@ -75,18 +75,19 @@ void MetricsThread::getInitialProcessList() {
         process->setCPUPercentage(processInfo.cpu_percentage);
         emit addProcessInfo(processInfo);
     }
-    this->updateAllCPUUsage();
+    this->updateAllUsages();
 }
 
-void MetricsThread::updateAllCPUUsage() {
-    // create a QList from all the keys in the map
+void MetricsThread::updateAllUsages() {
     QList<QString> pids = this->m_processInfoList.keys();
-    // get the CPU usage for all the processes
     auto cpuUsages = CrossProcess::getProcessCPUUsage(pids);
-    // update the CPU usage for each process
+    auto memoryUsages = CrossProcess::getProcessMemoryUsage(pids);
     for (int i = 0; i < pids.size(); i++) {
         auto processInfo = this->m_processInfoList[pids[i]];
         processInfo.cpu_percentage = cpuUsages[i];
+        processInfo.memory_percentage = memoryUsages[i];
         emit updateProcessInfo(processInfo);
+        msleep(10);
     }
 }
+

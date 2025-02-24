@@ -23,18 +23,6 @@ void ProcessMetrics::setProcessName(QString processName) {
     emit processNameChanged(m_processName);
 }
 
-double ProcessMetrics::cpuUsage() const {
-    return m_cpuUsage;
-}
-
-void ProcessMetrics::setCPUUsage(double cpuUsage) {
-    if (m_cpuUsage == cpuUsage)
-        return;
-
-    m_cpuUsage = cpuUsage;
-    emit cpuUsageChanged(m_cpuUsage);
-}
-
 double ProcessMetrics::cpuPercentage() const {
     return m_cpuPercentage;
 }

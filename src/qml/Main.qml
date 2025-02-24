@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import RMM
@@ -43,17 +44,26 @@ ApplicationWindow {
                 font.pixelSize: 16
                 font.bold: true
             }
-            Label {
-                text: "CPU Usage"
-                font.pixelSize: 16
-                font.bold: true
-                Layout.alignment: Qt.AlignRight
+            Item {
+                Layout.alignment: Qt.AlignCenter
+                width: 100
+                Label {
+                    anchors.centerIn: parent
+                    text: "Memory (MB)"
+                    font.pixelSize: 16
+                    font.bold: true
+                }
             }
-            Label {
-                text: "CPU %"
-                font.pixelSize: 16
-                font.bold: true
+            Item {
                 Layout.alignment: Qt.AlignRight
+                width: 100
+                Label {
+                    anchors.centerIn: parent
+                    text: "CPU %"
+                    width: 100
+                    font.pixelSize: 16
+                    font.bold: true
+                }
             }
         }
         Rectangle {
@@ -66,17 +76,20 @@ ApplicationWindow {
         ListView {
             id: listView
             property real scrollPosition: 0
-            function savePosition(){
+
+            function savePosition() {
                 scrollPosition = contentY;
             }
 
             Connections {
                 target: monitor
+
                 function onBeforeProcessesChanged() {
                     listView.savePosition()
                 }
+
                 function onAfterProcessesChanged() {
-                   listView.contentY = listView.scrollPosition
+                    listView.contentY = listView.scrollPosition
                 }
             }
 
@@ -84,6 +97,7 @@ ApplicationWindow {
             width: parent.width - 20
             height: parent.height - 50
             model: monitor.processes
+
             spacing: 5
             clip: true
             delegate: ItemDelegate {
@@ -99,15 +113,21 @@ ApplicationWindow {
                         font.pixelSize: 16
                         font.bold: true
                     }
-                    Label {
-                        Layout.alignment: Qt.AlignRight
-                        text: modelData.cpuUsage
-                        width: 50
+                    Item {
+                        Layout.alignment: Qt.AlignCenter
+                        width: 100
+                        Label {
+                            anchors.centerIn: parent
+                            text: Math.round(modelData.RAMPercentage) + " MB";
+                        }
                     }
-                    Label {
+                    Item {
                         Layout.alignment: Qt.AlignRight
-                        text: Math.round((modelData.cpuPercentage + Number.EPSILON) * 100) / 100 + "%";
-                        width: 50
+                        width: 100
+                        Label {
+                            anchors.centerIn: parent
+                            text: Math.round((modelData.cpuPercentage + Number.EPSILON) * 100) / 100 + "%";
+                        }
                     }
                 }
             }

@@ -66,6 +66,10 @@ void SystemMonitor::onUpdateProcessInfo(const ProcessInfo& pi) {
             break;
         }
     }
+    // sort processes by cpu usage
+    // std::sort(m_processes.begin(), m_processes.end(), [](const ProcessMetrics* a, const ProcessMetrics* b) {
+    //     return a->cpuPercentage() > b->cpuPercentage();
+    // });
 }
 
 void SystemMonitor::onAddProcessInfo(const ProcessInfo& pi) {
