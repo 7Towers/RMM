@@ -44,6 +44,33 @@ std::vector<double> CrossProcess::getProcessMemoryUsage(const QList<QString> &pi
 #endif
 }
 
+double CrossProcess::totalCPUUsage() {
+#ifdef Q_OS_WIN
+    return winTotalCPUUsage();
+#elif
+    qWarning() << "CrossProcess::totalCPUUsage() not implemented for this platform";
+    return -1.0;
+#endif
+}
+
+double CrossProcess::totalMemoryUsage() {
+#ifdef Q_OS_WIN
+    return winTotalMemoryUsage();
+#elif
+    qWarning() << "CrossProcess::totalMemoryUsage() not implemented for this platform";
+    return -1.0;
+#endif
+}
+
+double CrossProcess::totalPercentMemoryUsed() {
+#ifdef Q_OS_WIN
+    return winTotalPercentMemoryUsed();
+#elif
+    qWarning() << "CrossProcess::totalPercentMemoryUsed() not implemented for this platform";
+    return -1.0;
+#endif
+}
+
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <psapi.h>
@@ -172,6 +199,62 @@ std::vector<double> CrossProcess::winGetProcessMemoryUsage(const QList<QString> 
 
     return memoryUsages;
 }
+
+double CrossProcess::winTotalCPUUsage() {
+    FILETIME idleTime, kernelTime, userTime;
+    if (GetSystemTimes(&idleTime, &kernelTime, &userTime) == 0) {
+        return -1.0;
+    }
+
+    ULARGE_INTEGER sysIdle, sysKernel, sysUser;
+    sysIdle.LowPart = idleTime.dwLowDateTime;
+    sysIdle.HighPart = idleTime.dwHighDateTime;
+    sysKernel.LowPart = kernelTime.dwLowDateTime;
+    sysKernel.HighPart = kernelTime.dwHighDateTime;
+    sysUser.LowPart = userTime.dwLowDateTime;
+    sysUser.HighPart = userTime.dwHighDateTime;
+
+    static ULARGE_INTEGER prevSysIdle, prevSysKernel, prevSysUser;
+    ULONGLONG sysIdleDiff = sysIdle.QuadPart - prevSysIdle.QuadPart;
+    ULONGLONG sysKernelDiff = sysKernel.QuadPart - prevSysKernel.QuadPart;
+    ULONGLONG sysUserDiff = sysUser.QuadPart - prevSysUser.QuadPart;
+
+    prevSysIdle = sysIdle;
+    prevSysKernel = sysKernel;
+    prevSysUser = sysUser;
+
+    ULONGLONG sysTotal = sysKernelDiff + sysUserDiff;
+    double cpuUsage = (sysTotal - sysIdleDiff) * 100.0 / sysTotal;
+
+    return cpuUsage;
+}
+
+double CrossProcess::winTotalMemoryUsage() {
+    MEMORYSTATUSEX memInfo;
+    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+    if (GlobalMemoryStatusEx(&memInfo) == 0) {
+        return -1.0;
+    }
+
+    DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+    DWORDLONG physMemUsed = totalPhysMem - memInfo.ullAvailPhys;
+
+    return static_cast<double>(physMemUsed) / (1024 * 1024); // Convert to MB
+}
+
+double CrossProcess::winTotalPercentMemoryUsed() {
+    MEMORYSTATUSEX memInfo;
+    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+    if (GlobalMemoryStatusEx(&memInfo) == 0) {
+        return -1.0;
+    }
+
+    DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+    DWORDLONG physMemUsed = totalPhysMem - memInfo.ullAvailPhys;
+
+    return (static_cast<double>(physMemUsed) / totalPhysMem) * 100.0;
+}
+
 
 #endif
 

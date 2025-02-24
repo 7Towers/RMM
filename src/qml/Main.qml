@@ -29,10 +29,10 @@ ApplicationWindow {
             width: parent.width
         }
 
-        Column {
+        Item {
             width: parent.width - 20
+            height: 25
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 10
 
             Label {
                 text: "Total processes: " + monitor.processes.length
@@ -40,6 +40,30 @@ ApplicationWindow {
                 font.pixelSize: 16
                 color: "#333"
             }
+        }
+
+        Item {
+            height: 20
+            width: parent.width - 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            Row {
+                spacing: 20
+                Label {
+                    text: "<b>Total CPU Usage: </b>" + Math.round(((monitor.totalCPUUsage) + Number.EPSILON) * 100) / 100 + "%"
+                    font.pixelSize: 16
+                    color: "darkgreen"
+                }
+                Label {
+                    text: "<b>Total RAM Usage: </b>" + Math.round(monitor.totalMemoryUsage) + " MB " + "(" + Math.round(monitor.totalMemoryPercentUsage) + "%" + ")"
+                    font.pixelSize: 16
+                    color: "darkblue"
+                }
+            }
+        }
+        Item {
+            width: parent.width - 20
+            height: 25
+            anchors.horizontalCenter: parent.horizontalCenter
             Label {
                 text: "Select a header button to sort"
                 font.pixelSize: 12
@@ -118,7 +142,7 @@ ApplicationWindow {
 
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 20
-            height: parent.height - 50
+            height: parent.height - 225
             model: monitor.processes
 
             spacing: 5

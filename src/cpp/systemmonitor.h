@@ -17,10 +17,17 @@ class SystemMonitor : public QQuickItem
     QML_ELEMENT
     Q_PROPERTY(QQmlListProperty<ProcessMetrics> processes READ processes NOTIFY processesChanged)
     Q_PROPERTY(QString sortType READ sortType WRITE sortType NOTIFY sortTypeChanged)
+    Q_PROPERTY(double totalCPUUsage READ totalCPUUsage NOTIFY totalCPUUsageChanged)
+    Q_PROPERTY(double totalMemoryUsage READ totalMemoryUsage NOTIFY totalMemoryUsageChanged)
+    Q_PROPERTY(double totalMemoryPercentUsage READ totalPercentMemoryUsage NOTIFY totalPercentMemoryUsageChanged)
+
 public:
     SystemMonitor();
     ~SystemMonitor() override;
     QQmlListProperty<ProcessMetrics> processes();
+    double totalCPUUsage() const;
+    double totalMemoryUsage() const;
+    double totalPercentMemoryUsage() const;
     Q_INVOKABLE void start();
     Q_INVOKABLE void sortByRAM();
     Q_INVOKABLE void sortByCPU();
@@ -37,6 +44,7 @@ public slots:
     void onFinishedUpdateCycle();
 private:
     void cleanupProcessRefs();
+
     QList<ProcessMetrics*> m_processes = QList<ProcessMetrics*>();
     MetricsThread metricsThread = MetricsThread(this);
     void sort();
@@ -44,12 +52,18 @@ private:
     bool m_sortByCPU = false;
     bool m_sortByName = false;
     QString m_sortType = "";
+    double m_totalCPUUsage = 0;
+    double m_totalMemoryUsage = 0;
+    double m_totalMemoryPercentUsage = 0;
 
 signals:
     void beforeProcessesChanged();
     void processesChanged();
     void afterProcessesChanged();
     void sortTypeChanged();
+    void totalCPUUsageChanged();
+    void totalMemoryUsageChanged();
+    void totalPercentMemoryUsageChanged();
 };
 
 #endif // SYSTEMMONITOR_H

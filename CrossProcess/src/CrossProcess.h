@@ -18,12 +18,18 @@ public:
     static QMap<QString, ProcessInfo> getProcessInfoList();
     static std::vector<double> getProcessCPUUsage(const QList<QString> &pids);
     static std::vector<double> getProcessMemoryUsage(const QList<QString> &pids);
+    static double totalCPUUsage();
+    static double totalMemoryUsage();
+    static double totalPercentMemoryUsed();
 private:
 #ifdef Q_OS_WIN
     static QList<QString> winGetProcessIDList();
     static QMap<QString, ProcessInfo> winGetProcessInfoList();
     static std::vector<double> winGetProcessCPUUsage(const QList<QString> &pids);
     static std::vector<double> winGetProcessMemoryUsage(const QList<QString> &pids);
+    static double winTotalCPUUsage();
+    static double winTotalMemoryUsage();
+    static double winTotalPercentMemoryUsed();
 #elif Q_OS_MACOS
     static QList<QString> macGetProcessIDList();
     static QMap<QString, ProcessInfo> macGetProcessInfoList();

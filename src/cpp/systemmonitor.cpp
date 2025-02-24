@@ -3,7 +3,14 @@
 #include <QDir>
 
 
-SystemMonitor::SystemMonitor() = default;
+SystemMonitor::SystemMonitor() {
+    this->m_totalCPUUsage = CrossProcess::totalCPUUsage();
+    this->m_totalMemoryUsage = CrossProcess::totalMemoryUsage();
+    this->m_totalMemoryPercentUsage = CrossProcess::totalPercentMemoryUsed();
+    emit totalCPUUsageChanged();
+    emit totalMemoryUsageChanged();
+    emit totalPercentMemoryUsageChanged();
+};
 
 SystemMonitor::~SystemMonitor() {
     cleanupProcessRefs();
@@ -13,6 +20,18 @@ SystemMonitor::~SystemMonitor() {
 
 QQmlListProperty<ProcessMetrics> SystemMonitor::processes() {
     return {this, &m_processes};
+}
+
+double SystemMonitor::totalCPUUsage() const {
+    return m_totalCPUUsage;
+}
+
+double SystemMonitor::totalMemoryUsage() const {
+    return m_totalMemoryUsage;
+}
+
+double SystemMonitor::totalPercentMemoryUsage() const {
+    return this->m_totalMemoryPercentUsage;
 }
 
 void SystemMonitor::cleanupProcessRefs() {
@@ -132,6 +151,13 @@ void SystemMonitor::onAddProcessInfo(const ProcessInfo &pi) {
 }
 
 void SystemMonitor::onFinishedUpdateCycle() {
+    this->m_totalCPUUsage = CrossProcess::totalCPUUsage();
+    this->m_totalMemoryUsage = CrossProcess::totalMemoryUsage();
+    this->m_totalMemoryPercentUsage = CrossProcess::totalPercentMemoryUsed();
+    emit totalCPUUsageChanged();
+    emit totalMemoryUsageChanged();
+    emit totalPercentMemoryUsageChanged();
+
     emit processesChanged();
     emit afterProcessesChanged();
 }
