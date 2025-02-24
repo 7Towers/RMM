@@ -174,7 +174,7 @@ ApplicationWindow {
                         width: 100
                         Label {
                             anchors.centerIn: parent
-                            text: Math.round((modelData.cpuPercentage + Number.EPSILON) * 100) / 100 + "%";
+                            text: Math.round(((modelData.cpuPercentage * .1) + Number.EPSILON) * 100) / 100 + "%";
                         }
                     }
                 }
