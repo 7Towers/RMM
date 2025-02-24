@@ -24,45 +24,68 @@ ApplicationWindow {
         height: parent.height
         spacing: 10
 
-        RowLayout {
+        Item {
+            height: 20
+            width: parent.width
+        }
+
+        Column {
             width: parent.width - 20
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 10
 
             Label {
-                Layout.alignment: Qt.AlignLeft
                 text: "Total processes: " + monitor.processes.length
                 font.bold: true
+                font.pixelSize: 16
                 color: "#333"
+            }
+            Label {
+                text: "Select a header button to sort"
+                font.pixelSize: 12
+                font.italic: true
+                color: Material.Blue
             }
         }
 
-        RowLayout {
+        Item {
             width: parent.width - 20
+            height: 50
             anchors.horizontalCenter: parent.horizontalCenter
-            Label {
+            Button {
+                Material.background: monitor.sortType === text ? Material.Blue : Material.Gray
+                Material.elevation: 1
+                anchors.left: parent.left
                 text: "Process Name"
                 font.pixelSize: 16
                 font.bold: true
-            }
-            Item {
-                Layout.alignment: Qt.AlignCenter
-                width: 100
-                Label {
-                    anchors.centerIn: parent
-                    text: "Memory (MB)"
-                    font.pixelSize: 16
-                    font.bold: true
+                onClicked: {
+                    monitor.sortByName()
+                    monitor.sortType = text;
                 }
             }
-            Item {
-                Layout.alignment: Qt.AlignRight
-                width: 100
-                Label {
-                    anchors.centerIn: parent
-                    text: "CPU %"
-                    width: 100
-                    font.pixelSize: 16
-                    font.bold: true
+            Button {
+                Material.background: monitor.sortType === text ? Material.Blue : Material.Gray
+                Material.elevation: 1
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "Memory (MB)"
+                font.pixelSize: 16
+                font.bold: true
+                onClicked: {
+                    monitor.sortByRAM()
+                    monitor.sortType = text;
+                }
+            }
+            Button {
+                Material.background: monitor.sortType === text ? Material.Blue : Material.Gray
+                Material.elevation: 1
+                anchors.right: parent.right
+                text: "CPU %"
+                font.pixelSize: 16
+                font.bold: true
+                onClicked: {
+                    monitor.sortByCPU()
+                    monitor.sortType = text;
                 }
             }
         }
@@ -104,17 +127,18 @@ ApplicationWindow {
                 width: listView.width
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 50
-                RowLayout {
+                Item {
                     anchors.fill: parent
                     anchors.margins: 20
                     Label {
-                        Layout.alignment: Qt.AlignLeft
+                        anchors.left: parent.left
                         text: modelData.processName
+                        width: 200
                         font.pixelSize: 16
                         font.bold: true
                     }
                     Item {
-                        Layout.alignment: Qt.AlignCenter
+                        anchors.horizontalCenter: parent.horizontalCenter
                         width: 100
                         Label {
                             anchors.centerIn: parent
@@ -122,7 +146,7 @@ ApplicationWindow {
                         }
                     }
                     Item {
-                        Layout.alignment: Qt.AlignRight
+                        anchors.right: parent.right
                         width: 100
                         Label {
                             anchors.centerIn: parent

@@ -3,26 +3,40 @@
 #include <QDir>
 
 
-SystemMonitor::SystemMonitor()= default;
+SystemMonitor::SystemMonitor() = default;
 
-SystemMonitor::~SystemMonitor()
-{
+SystemMonitor::~SystemMonitor() {
     cleanupProcessRefs();
     metricsThread.stop();
     metricsThread.wait();
 }
 
-QQmlListProperty<ProcessMetrics> SystemMonitor::processes()
-{
+QQmlListProperty<ProcessMetrics> SystemMonitor::processes() {
     return {this, &m_processes};
 }
 
-void SystemMonitor::cleanupProcessRefs()
-{
-    for (auto& process : m_processes) {
+void SystemMonitor::cleanupProcessRefs() {
+    for (auto &process: m_processes) {
         delete process;
     }
     m_processes.clear();
+}
+
+void SystemMonitor::sort()
+{
+    if (this->m_sortByCPU) {
+        std::sort(m_processes.begin(), m_processes.end(), [](const ProcessMetrics *a, const ProcessMetrics *b) {
+            return a->cpuPercentage() > b->cpuPercentage();
+        });
+    } else if (this->m_sortByRAM) {
+        std::sort(m_processes.begin(), m_processes.end(), [](const ProcessMetrics *a, const ProcessMetrics *b) {
+            return a->RAMUsage() > b->RAMUsage();
+        });
+    } else if (this->m_sortByName) {
+        std::sort(m_processes.begin(), m_processes.end(), [](const ProcessMetrics *a, const ProcessMetrics *b) {
+            return a->processName() < b->processName();
+        });
+    }
 }
 
 
@@ -30,10 +44,50 @@ void SystemMonitor::start() {
     connect(&metricsThread, &MetricsThread::updateProcessInfo, this, &SystemMonitor::onUpdateProcessInfo);
     connect(&metricsThread, &MetricsThread::removeProcessInfo, this, &SystemMonitor::onRemoveProcessInfo);
     connect(&metricsThread, &MetricsThread::addProcessInfo, this, &SystemMonitor::onAddProcessInfo);
+    connect(&metricsThread, &MetricsThread::finishedUpdateCycle, this, &SystemMonitor::onFinishedUpdateCycle);
     metricsThread.start();
 }
 
-void SystemMonitor::onRemoveProcessInfo(const ProcessInfo& pi) {
+void SystemMonitor::sortByRAM() {
+    emit this->beforeProcessesChanged();
+    this->m_sortByName = false;
+    this->m_sortByCPU = false;
+    this->m_sortByRAM = true;
+    sort();
+    emit this->processesChanged();
+    emit this->afterProcessesChanged();
+}
+
+void SystemMonitor::sortByCPU() {
+    emit this->beforeProcessesChanged();
+    this->m_sortByName = false;
+    this->m_sortByCPU = true;
+    this->m_sortByRAM = false;
+    sort();
+    emit this->processesChanged();
+    emit this->afterProcessesChanged();
+}
+
+void SystemMonitor::sortByName() {
+    emit this->beforeProcessesChanged();
+    this->m_sortByName = true;
+    this->m_sortByCPU = false;
+    this->m_sortByRAM = false;
+    sort();
+    emit this->processesChanged();
+    emit this->afterProcessesChanged();
+}
+
+QString SystemMonitor::sortType() const {
+    return this->m_sortType;
+}
+
+void SystemMonitor::sortType(const QString &sortType) {
+    this->m_sortType = sortType;
+    emit this->sortTypeChanged();
+}
+
+void SystemMonitor::onRemoveProcessInfo(const ProcessInfo &pi) {
     emit beforeProcessesChanged();
     qDebug() << "Removing process info";
     int indexToRemove = -1;
@@ -48,31 +102,24 @@ void SystemMonitor::onRemoveProcessInfo(const ProcessInfo& pi) {
     }
     const auto processToRemove = m_processes.takeAt(indexToRemove);
     delete processToRemove;
-    emit processesChanged();
-    emit afterProcessesChanged();
 }
 
-void SystemMonitor::onUpdateProcessInfo(const ProcessInfo& pi) {
+void SystemMonitor::onUpdateProcessInfo(const ProcessInfo &pi) {
     // find the process in processList by pid, then update it
     emit beforeProcessesChanged();
     qDebug() << "Updating process info";
-    for (auto& process : m_processes) {
+    for (auto &process: m_processes) {
         if (process->pid() == pi.pid()) {
             process->setCPUPercentage(pi.cpu_percentage);
             process->setRAMUsage(pi.memory_percentage);
             process->setProcessName(pi.name);
-            emit processesChanged();
-            emit afterProcessesChanged();
             break;
         }
     }
-    // sort processes by cpu usage
-    // std::sort(m_processes.begin(), m_processes.end(), [](const ProcessMetrics* a, const ProcessMetrics* b) {
-    //     return a->cpuPercentage() > b->cpuPercentage();
-    // });
+    sort();
 }
 
-void SystemMonitor::onAddProcessInfo(const ProcessInfo& pi) {
+void SystemMonitor::onAddProcessInfo(const ProcessInfo &pi) {
     emit beforeProcessesChanged();
     qDebug() << "Adding process info";
     auto pm = new ProcessMetrics();
@@ -80,6 +127,11 @@ void SystemMonitor::onAddProcessInfo(const ProcessInfo& pi) {
     pm->setProcessName(pi.name);
     pm->setCPUPercentage(pi.cpu_percentage);
     m_processes.append(pm);
+    emit processesChanged();
+    emit afterProcessesChanged();
+}
+
+void SystemMonitor::onFinishedUpdateCycle() {
     emit processesChanged();
     emit afterProcessesChanged();
 }

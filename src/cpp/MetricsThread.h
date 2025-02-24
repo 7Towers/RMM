@@ -30,6 +30,7 @@ signals:
         void updateProcessInfo(ProcessInfo pi);
         void removeProcessInfo(ProcessInfo pi);
         void addProcessInfo(ProcessInfo pi);
+        void finishedUpdateCycle();
 };
 
 

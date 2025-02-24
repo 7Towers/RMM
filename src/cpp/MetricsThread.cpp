@@ -17,8 +17,10 @@ void MetricsThread::stop() {
 
 void MetricsThread::run() {
     this->getInitialProcessList();
+    emit this->finishedUpdateCycle();
     while (m_running) {
         this->updateProcessList();
+        emit this->finishedUpdateCycle();
         sleep(1);
     }
 }
