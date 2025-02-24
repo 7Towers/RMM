@@ -24,9 +24,14 @@ ApplicationWindow {
         spacing: 10
 
         RowLayout {
+            width: parent.width - 20
+            anchors.horizontalCenter: parent.horizontalCenter
+
             Label {
                 Layout.alignment: Qt.AlignLeft
                 text: "Total processes: " + monitor.processes.length
+                font.bold: true
+                color: "#333"
             }
         }
 
@@ -51,6 +56,13 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignRight
             }
         }
+        Rectangle {
+            height: 1
+            width: parent.width - 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            color: '#333'
+        }
+
         ListView {
             id: listView
             property real scrollPosition: 0
@@ -61,11 +73,9 @@ ApplicationWindow {
             Connections {
                 target: monitor
                 function onBeforeProcessesChanged() {
-                    console.log("QML Saving scroll position");
                     listView.savePosition()
                 }
                 function onAfterProcessesChanged() {
-                    console.log("QML resetting scroll position");
                    listView.contentY = listView.scrollPosition
                 }
             }
@@ -77,11 +87,12 @@ ApplicationWindow {
             spacing: 5
             clip: true
             delegate: ItemDelegate {
-                width: listView.width - 20
+                width: listView.width
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 50
                 RowLayout {
                     anchors.fill: parent
+                    anchors.margins: 20
                     Label {
                         Layout.alignment: Qt.AlignLeft
                         text: modelData.processName
@@ -95,7 +106,7 @@ ApplicationWindow {
                     }
                     Label {
                         Layout.alignment: Qt.AlignRight
-                        text: modelData.cpuPercentage
+                        text: Math.round((modelData.cpuPercentage + Number.EPSILON) * 100) / 100 + "%";
                         width: 50
                     }
                 }

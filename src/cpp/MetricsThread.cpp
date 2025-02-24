@@ -18,7 +18,6 @@ void MetricsThread::stop() {
 void MetricsThread::run() {
     this->getInitialProcessList();
     while (m_running) {
-        qDebug() << "Doing work";
         this->updateProcessList();
         sleep(1);
     }
@@ -30,10 +29,10 @@ void MetricsThread::updateProcessList()
     auto newProcessInfoList = CrossProcess::getProcessInfoList();
     // when you loop through, see if process info has changed compared to this->m_processInfoList
     for (auto& processInfo : newProcessInfoList) {
-        if (this->m_processInfoList.contains(processInfo.pid)) {
-            auto oldProcessInfo = this->m_processInfoList[processInfo.pid];
-            if (oldProcessInfo.cpu_percentage != processInfo.cpu_percentage) {
-                emit updateProcessInfo(processInfo);
+        if (this->m_processInfoList.contains(processInfo.pid())) {
+            auto oldProcessInfo = this->m_processInfoList[processInfo.pid()];
+            if (oldProcessInfo.hasCPUChanged()) {
+                emit updateProcessInfo(oldProcessInfo);
             }
             if (oldProcessInfo.memory_percentage != processInfo.memory_percentage) {
                 emit updateProcessInfo(processInfo);
@@ -42,19 +41,24 @@ void MetricsThread::updateProcessList()
                 emit updateProcessInfo(processInfo);
             }
         } else {
-            this->m_processInfoList[processInfo.pid] = processInfo;
+            this->m_processInfoList[processInfo.pid()] = processInfo;
+
+            if (!processInfo.pid().isEmpty()) {
+                processInfo.initCPUUsageMonitor();
+            }
             emit addProcessInfo(processInfo);
         }
     }
     // if a process is no longer in the list, emit removeProcessInfo
     for (auto it = this->m_processInfoList.begin(); it != this->m_processInfoList.end(); it++) {
         auto processInfo = it.value();
-        if (!newProcessInfoList.contains(processInfo.pid)) {
+        if (!newProcessInfoList.contains(processInfo.pid())) {
             emit removeProcessInfo(processInfo);
             it = this->m_processInfoList.erase(it);
-            qDebug() << "Removed process info with pid: " << processInfo.pid;
+            qDebug() << "Removed process info with pid: " << processInfo.pid();
         }
     }
+    this->updateAllCPUUsage();
 }
 
 void MetricsThread::cleanupProcessRefs() {
@@ -66,9 +70,23 @@ void MetricsThread::getInitialProcessList() {
     this->m_processInfoList = processInfoList;
     for (auto& processInfo : this->m_processInfoList) {
         auto process = new ProcessMetrics();
-        process->setPid(processInfo.pid);
+        process->setPid(processInfo.pid());
         process->setProcessName(processInfo.name);
         process->setCPUPercentage(processInfo.cpu_percentage);
         emit addProcessInfo(processInfo);
+    }
+    this->updateAllCPUUsage();
+}
+
+void MetricsThread::updateAllCPUUsage() {
+    // create a QList from all the keys in the map
+    QList<QString> pids = this->m_processInfoList.keys();
+    // get the CPU usage for all the processes
+    auto cpuUsages = CrossProcess::getProcessCPUUsage(pids);
+    // update the CPU usage for each process
+    for (int i = 0; i < pids.size(); i++) {
+        auto processInfo = this->m_processInfoList[pids[i]];
+        processInfo.cpu_percentage = cpuUsages[i];
+        emit updateProcessInfo(processInfo);
     }
 }

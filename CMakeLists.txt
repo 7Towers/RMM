@@ -39,6 +39,7 @@ set_target_properties(appRMM PROPERTIES
 )
 
 add_subdirectory(CrossProcess)
+add_subdirectory(Applet)
 
 target_link_libraries(appRMM
     PRIVATE Qt6::Quick

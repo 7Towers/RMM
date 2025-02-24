@@ -24,6 +24,7 @@ private:
     void updateProcessList();
     void cleanupProcessRefs();
     void getInitialProcessList();
+    void updateAllCPUUsage();
     std::atomic<bool> m_running = true;
 signals:
         void updateProcessInfo(ProcessInfo pi);

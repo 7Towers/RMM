@@ -14,6 +14,8 @@ add_library(${PROJECT_NAME}
         src/CrossProcess.h
         src/ProcessInfo.cpp
         src/ProcessInfo.h
+        src/CPUUsageMonitor.cpp
+        src/CPUUsageMonitor.h
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -24,4 +26,5 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         Qt6::Core
+        pdh
 )

@@ -26,6 +26,15 @@ QMap<QString, ProcessInfo> CrossProcess::getProcessInfoList() {
 #endif
 }
 
+std::vector<double> CrossProcess::getProcessCPUUsage(const QList<QString> &pids) {
+#ifdef Q_OS_WIN
+    return winGetProcessCPUUsage(pids);
+#elif
+    qWarning() << "CrossProcess::getProcessCPUUsage() not implemented for this platform";
+    return -1.0;
+#endif
+}
+
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <psapi.h>
@@ -70,9 +79,9 @@ QMap<QString, ProcessInfo> CrossProcess::winGetProcessInfoList() {
 
 
                     ProcessInfo pInfo;
-                    pInfo.pid = QString::number(processIds[i]);
+                    pInfo.setPID(QString::number(processIds[i]));
                     pInfo.name = QString::fromWCharArray(processName);
-                    pList[pInfo.pid] = pInfo;
+                    pList[pInfo.pid()] = pInfo;
 
                     CloseHandle(hProcess);
                 }
@@ -80,6 +89,61 @@ QMap<QString, ProcessInfo> CrossProcess::winGetProcessInfoList() {
         }
 
         return pList;
+}
+
+
+std::vector<double> CrossProcess::winGetProcessCPUUsage(const QList<QString> &pids) {
+    std::vector<double> cpuUsages(pids.size(), -1.0);
+    std::vector<HANDLE> handles(pids.size(), NULL);
+    std::vector<ULARGE_INTEGER> kernelStart(pids.size()), userStart(pids.size()), sysStart(pids.size());
+
+    FILETIME ftCreation, ftExit, ftKernel, ftUser, ftSys;
+    ULARGE_INTEGER ulSysStart;
+
+    // Open process handles and get initial times
+    for (int i = 0; i < pids.size(); ++i) {
+        DWORD processID = pids[i].toUInt();
+        handles[i] = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
+        if (handles[i] != NULL) {
+            GetProcessTimes(handles[i], &ftCreation, &ftExit, &ftKernel, &ftUser);
+            GetSystemTimeAsFileTime(&ftSys);
+
+            kernelStart[i].LowPart = ftKernel.dwLowDateTime;
+            kernelStart[i].HighPart = ftKernel.dwHighDateTime;
+            userStart[i].LowPart = ftUser.dwLowDateTime;
+            userStart[i].HighPart = ftUser.dwHighDateTime;
+            sysStart[i].LowPart = ftSys.dwLowDateTime;
+            sysStart[i].HighPart = ftSys.dwHighDateTime;
+        }
+    }
+
+    Sleep(1000); // Wait for 1 second
+
+    // Get end times and calculate CPU usage
+    for (int i = 0; i < pids.size(); ++i) {
+        if (handles[i] != NULL) {
+            GetProcessTimes(handles[i], &ftCreation, &ftExit, &ftKernel, &ftUser);
+            GetSystemTimeAsFileTime(&ftSys);
+
+            ULARGE_INTEGER kernelEnd, userEnd, sysEnd;
+            kernelEnd.LowPart = ftKernel.dwLowDateTime;
+            kernelEnd.HighPart = ftKernel.dwHighDateTime;
+            userEnd.LowPart = ftUser.dwLowDateTime;
+            userEnd.HighPart = ftUser.dwHighDateTime;
+            sysEnd.LowPart = ftSys.dwLowDateTime;
+            sysEnd.HighPart = ftSys.dwHighDateTime;
+
+            ULONGLONG kernelDiff = kernelEnd.QuadPart - kernelStart[i].QuadPart;
+            ULONGLONG userDiff = userEnd.QuadPart - userStart[i].QuadPart;
+            ULONGLONG sysDiff = sysEnd.QuadPart - sysStart[i].QuadPart;
+
+            cpuUsages[i] = (kernelDiff + userDiff) * 100.0 / sysDiff;
+
+            CloseHandle(handles[i]);
+        }
+    }
+
+    return cpuUsages;
 }
 
 #endif
