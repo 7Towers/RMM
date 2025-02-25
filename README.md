@@ -8,9 +8,11 @@ This is a sample project for performing Remote Monitoring and Managment.
 ## Features
 * Process monitoring
 * System resource monitoring
+
 ![processes.png](images/processes.png)
 
 * Script Running
+
 ![script_runner.png](images/script%20runner.png)
 ### Running the Project
 
