@@ -16,6 +16,8 @@ add_library(${PROJECT_NAME}
         src/ProcessInfo.h
         src/CPUUsageMonitor.cpp
         src/CPUUsageMonitor.h
+        src/ScriptRunner.cpp
+        src/ScriptRunner.h
 )
 
 target_include_directories(${PROJECT_NAME}

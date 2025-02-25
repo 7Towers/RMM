@@ -9,9 +9,11 @@ find_package(Qt6 6.8 REQUIRED COMPONENTS Quick)
 qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_executable(appRMM
-        src/cpp/main.cpp
         src/cpp/MetricsThread.cpp
         src/cpp/MetricsThread.h
+        src/cpp/ProcessMetrics.cpp
+        src/cpp/ProcessMetrics.h
+        src/cpp/main.cpp
 )
 
 qt_add_qml_module(appRMM
@@ -19,8 +21,10 @@ qt_add_qml_module(appRMM
     VERSION 1.0
     QML_FILES
         src/qml/Main.qml
-        SOURCES src/cpp/systemmonitor.h src/cpp/systemmonitor.cpp
-        SOURCES src/cpp/ProcessMetrics.cpp src/cpp/ProcessMetrics.h
+        SOURCES src/cpp/systemmonitor.cpp
+        SOURCES src/cpp/systemmonitor.h
+        SOURCES src/cpp/ScriptView.cpp
+        SOURCES src/cpp/ScriptView.h
 )
 
 target_include_directories(appRMM

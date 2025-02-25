@@ -126,7 +126,6 @@ void SystemMonitor::onRemoveProcessInfo(const ProcessInfo &pi) {
 void SystemMonitor::onUpdateProcessInfo(const ProcessInfo &pi) {
     // find the process in processList by pid, then update it
     emit beforeProcessesChanged();
-    qDebug() << "Updating process info";
     for (auto &process: m_processes) {
         if (process->pid() == pi.pid()) {
             process->setCPUPercentage(pi.cpu_percentage);
@@ -140,7 +139,6 @@ void SystemMonitor::onUpdateProcessInfo(const ProcessInfo &pi) {
 
 void SystemMonitor::onAddProcessInfo(const ProcessInfo &pi) {
     emit beforeProcessesChanged();
-    qDebug() << "Adding process info";
     auto pm = new ProcessMetrics();
     pm->setPid(pi.pid());
     pm->setProcessName(pi.name);
