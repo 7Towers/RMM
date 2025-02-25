@@ -25,7 +25,7 @@ void ScriptView::openScriptFolder() {
 void ScriptView::refreshScripts() {
     auto files = ScriptRunner::getScripts();
     QStringList fileNames;
-    for (auto file : files) {
+    for (auto file: files) {
         fileNames.append(file.fileName());
     }
     this->m_scripts = fileNames;
@@ -43,16 +43,23 @@ void ScriptView::runScript(QString fileName) {
         return;
     }
     if (this->m_runInSeparateWindow) {
-       success = ScriptRunner::runPythonScriptInTerminal(fileName);
+        success = ScriptRunner::runPythonScriptInTerminal(fileName);
+        if (success) {
+            this->m_successMessage = "Script launched in Terminal window";
+            this->m_errorMessage = "";
+        } else {
+            this->m_successMessage = "";
+            this->m_errorMessage = "Failed to open script in Terminal window";
+        }
     } else {
-       success = ScriptRunner::runPythonScript(fileName);
-    }
-    if (success) {
-        this->m_successMessage = "Script ran successfully";
-        this->m_errorMessage = "";
-    } else {
-        this->m_successMessage = "";
-        this->m_errorMessage = "Failed to run script";
+        success = ScriptRunner::runPythonScript(fileName);
+        if (success) {
+            this->m_successMessage = "Script ran successfully";
+            this->m_errorMessage = "";
+        } else {
+            this->m_successMessage = "";
+            this->m_errorMessage = "Failed to run script";
+        }
     }
     emit this->successMessageChanged();
     emit this->errorMessageChanged();
@@ -61,15 +68,14 @@ void ScriptView::runScript(QString fileName) {
 void ScriptView::removeScript(QString scriptName) {
     bool success = ScriptRunner::removeScript(scriptName);
     if (success) {
-        qDebug() << "Script " << scriptName<< " removed successfully";
+        qDebug() << "Script " << scriptName << " removed successfully";
         this->refreshScripts();
     } else {
         qWarning() << "Failed to remove script " << scriptName;
     }
 }
 
-bool ScriptView::isPythonInstalled()
-{
+bool ScriptView::isPythonInstalled() {
     return ScriptRunner::pythonInstalled();
 }
 

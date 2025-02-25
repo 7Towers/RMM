@@ -327,7 +327,7 @@ ApplicationWindow {
                 Label {
                     anchors.left: parent.left
                     anchors.leftMargin: 20
-                    text: "Available Scripts"
+                    text: scriptView.scripts.length === 0 ? "No scripts loaded. Load them with the <i>Load Script</i> button above" : "Available Scripts"
                     font.bold: true
                     font.pixelSize: 18
                     color: "#888"
