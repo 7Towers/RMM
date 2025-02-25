@@ -16,6 +16,7 @@ class ScriptRunner {
 public:
     static bool pythonInstalled();
     static bool runPythonScript(const QString &scriptName);
+    static bool runPythonScriptInTerminal(const QString &scriptName);
     static bool copyFileToDataPath(const QString &sourcePath);
     static QString scriptPath();
     static bool verifyScriptPathExists();

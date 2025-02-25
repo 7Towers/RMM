@@ -1,23 +1,9 @@
-# do some fibonacci stuff
-
-def fib(n):
+def fibonacci(n):
     a, b = 0, 1
-    while a < n:
+    for _ in range(n):
         print(a, end=' ')
-        a, b = b, a+b
-    print()
+        a, b = b, a + b
+    print()  # Add a newline at the end
 
-def fib2(n):
-    result = []
-    a, b = 0, 1
-    while a < n:
-        result.append(a)
-        a, b = b, a+b
-    return result
-
-if __name__ == "__main__":
-    import sys
-    fib(int(sys.argv[1]))
-
-# Run the script from the command line
-# python Fibonacci.py 1000
+# Print the first 10 Fibonacci numbers
+fibonacci(10)

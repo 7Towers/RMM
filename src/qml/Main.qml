@@ -25,6 +25,35 @@ ApplicationWindow {
         initialItem: mainPage
     }
 
+    property bool showToast: false
+    property string toastMessage: ""
+    property string toastTextColor: "lightgreen"
+
+    Rectangle {
+        id: customToast
+        width: parent.width
+        height: 50
+        color: "black"
+        opacity: 0.8
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: -height
+        Text {
+            anchors.centerIn: parent
+            color: toastTextColor
+            text: toastMessage
+            font.pixelSize: 18
+            font.bold: true
+        }
+
+        SequentialAnimation on y {
+            running: showToast
+            PropertyAnimation { to: 0; duration: 300 }
+            PauseAnimation { duration: 3000 }
+            PropertyAnimation { to: -customToast.height; duration: 300 }
+            onStopped: showToast = false
+        }
+    }
+
     Component {
         id: mainPage
         Page {
@@ -201,6 +230,25 @@ ApplicationWindow {
             scriptView.refreshScripts()
         }
     }
+
+    Connections {
+        target: scriptView
+        function onErrorMessageChanged() {
+            if (scriptView.errorMessage !== "") {
+                toastTextColor = "red"
+                showToast = true
+                toastMessage = scriptView.errorMessage
+            }
+        }
+
+        function onSuccessMessageChanged() {
+            if (scriptView.successMessage !== "") {
+                toastTextColor = "lightgreen"
+                showToast = true
+                toastMessage = scriptView.successMessage
+            }
+        }
+    }
     Component {
         id: scriptPage
         Page {
@@ -222,7 +270,7 @@ ApplicationWindow {
 
                 Label {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Load and Run Scripts"
+                    text: "Run Python Scripts"
                     font.pixelSize: 20
                     font.bold: true
                 }
@@ -231,6 +279,13 @@ ApplicationWindow {
                     width: parent.width - 20
                     height: 1
                     color: Material.Blue
+                }
+
+                Label {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: scriptView.isPythonInstalled() ? "" : "Python is not installed on your system. Please install Python to run scripts."
+                    font.pixelSize: 16
+                    color: "red"
                 }
 
                 Row {
@@ -260,6 +315,15 @@ ApplicationWindow {
                     }
                 }
 
+                CheckBox {
+                    id: checkBox
+                    text: "Run In Separate Windows"
+                    checked: scriptView.runInSeparateWindow
+                    onCheckedChanged: {
+                        scriptView.runInSeparateWindow = checked
+                    }
+                }
+
                 Label {
                     anchors.left: parent.left
                     anchors.leftMargin: 20
@@ -282,7 +346,7 @@ ApplicationWindow {
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 20
                             Label {
-                                text: modelData
+                                text: "\u2022 " + modelData
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 200
                                 font.pixelSize: 16

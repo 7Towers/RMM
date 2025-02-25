@@ -33,7 +33,29 @@ void ScriptView::refreshScripts() {
 }
 
 void ScriptView::runScript(QString fileName) {
-    ScriptRunner::runPythonScript(fileName);
+    bool success = false;
+    success = ScriptRunner::pythonInstalled();
+    if (!success) {
+        this->m_successMessage = "";
+        this->m_errorMessage = "Python is not installed or not found in PATH";
+        emit this->successMessageChanged();
+        emit this->errorMessageChanged();
+        return;
+    }
+    if (this->m_runInSeparateWindow) {
+       success = ScriptRunner::runPythonScriptInTerminal(fileName);
+    } else {
+       success = ScriptRunner::runPythonScript(fileName);
+    }
+    if (success) {
+        this->m_successMessage = "Script ran successfully";
+        this->m_errorMessage = "";
+    } else {
+        this->m_successMessage = "";
+        this->m_errorMessage = "Failed to run script";
+    }
+    emit this->successMessageChanged();
+    emit this->errorMessageChanged();
 }
 
 void ScriptView::removeScript(QString scriptName) {
@@ -46,6 +68,27 @@ void ScriptView::removeScript(QString scriptName) {
     }
 }
 
+bool ScriptView::isPythonInstalled()
+{
+    return ScriptRunner::pythonInstalled();
+}
+
 QStringList ScriptView::scripts() const {
     return m_scripts;
+}
+
+bool ScriptView::runInSeparateWindow() const {
+    return this->m_runInSeparateWindow;
+}
+
+void ScriptView::setRunInSeparateWindow(bool runInSeparateWindow) {
+    this->m_runInSeparateWindow = runInSeparateWindow;
+}
+
+QString ScriptView::successMessage() const {
+    return this->m_successMessage;
+}
+
+QString ScriptView::errorMessage() const {
+    return this->m_errorMessage;
 }
